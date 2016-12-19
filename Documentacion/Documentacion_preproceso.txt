@@ -1,0 +1,34 @@
+Documentación:
+- Preproceso:
+-- Accidentes: [preproceso_accidents.ipynb]
+    Lo que hemos hecho en el preproceso ha sido seleccionar todos los accidentes y transformarlos para obtener un integer (muy similar al Unix Time) de forma que así podíamos saber en que fecha estaba con un solo campo. Como hemos trabajado con una librería de Python llamada 'Pandas' necesitamos pasar ese integer a formato Datetime, por lo que queremos que todo de muestre con el formato: %Y/%m/%d %H:%M.
+    Una vez obtenida esta parte y guardada en la tabla, se procede a eliminar el resto de tablas innecesarias relacionadas con la fecha porque ya están mejor expresadas en un único campo. Solo para asegurarnos, comprobamos los valores y los representamos para estar seguros de que hemos hecho correctamente la transformación.
+    Como se puede observar, hay tres subconjuntos en total, donde dos de ellos están mal insertada la localización por lo que se procede a eliminarlos. De esta forma obtenemos el resultado final ya prepocesado y limpio de filas corrompidas que solo ensucian la tabla y no aportar realmente valor. Para finalizar, guardamos estos datos de la tabla obtenida a un archivo con extensión CSV.
+    
+-- Tormentas:
+    Preproceso de localizaciones. [preproceso_locations_storms_0.ipynb]
+        En esta parte del sistema lo primero que haremos será cargar los datos de la tabla, para asegurarnos de si realmente es necesario hacer una limpieza comprobamos si tiene valores nulos y como si los tiene, procedemos a comprobar si realmente nos afectarían esos campos nulos o podemos dejas esas filas introducidas. Como observamos, salvo los dos primeros campos, el resto tienen bastantes datos con valores nulos.
+        Para una mejor comprensión, renombramos los nombres de las columnas a nuestro gusto (ya que somos nosotros los que vamos a trabajar con los datos), solo se lo hacemos a LAT1 y LON1. Por otra parte, a la columna de RANGE le asignamos un valor por defecto si es nulo, que es el 0.
+        Se comprueba el número de valores que aún siguen nulos (tanto para LAT1 y LON1 son el mismo número como lo son entre LAT2 y LON2; esto significa que se introducieron mal desde un principio ambos valores o se omitieron).
+        Se procede a eliminar los valores de la tabla que tienen un valor LAT1 igual o superior a 42. Esto es así porque no nos interesan estos resultados. Mostramos los valores de la tabla en forma de gráfica y vemos que muchos valores se han introduccido de forma incorrecta (poniendo puntos o guiones) por lo que procedemos a modificarlos para poder encontrar una forma de expresarlos común y no desechar esos datos.
+        Incluso después de hacer estas modificaciones, aún existe un subconjunto que no pertenece a la zona que estamos analizando por lo que procedemos a eliminarlos completamente.
+        Una vez comprobada la tabla observamos que no es posible la utilización de LAT2 y LON2 debido a todo el ruido que contienen por lo que usaremos los puntos de posición de la tabla DETAILS. Aunque se pierde algo de información, opinamos que la mejora es sustancial en cuanto a obtener unos resultados correctos. Por último almacenamos los datos en un archivo nuevo para seguir trabajando con ellos.
+    Preproceso de detalles [preproceso_details_storms1.ipynb]
+        Primero comprobamos que campos de la tabla tienen valores nulos para saber si podemos prescindir de ellos o por otra parte son indispensables y se han de eliminar las filas.
+        A continuación eliminamos los que no tienen asociado un evento (en nuestro caso, tormenta). Esto nos permite centrarnos en los que ha habido un efecto metereológico del tipo tormenta.
+        Una vez que tenemos los episodios, los convertimos a tipo entero y le damos formato a las fechas como hicimos en la tabla de accidentes. Fijamos el valor cero a los campos que no tengan datos ya que suponemos que si no se ha marcado ninguna muerte es porque no han llegado a suceder.
+        A continuación se transforman los valores de las pérdidas económicas (propiedades y cultivos). Al realizar este paso se puede ver que los valores se repiten muy a menudo, por lo que intuimos que fueron tomados con poca precisión, consideramos que son valores orientativos.
+        Seguimos procesando la tabla y decidimos eliminar los nulos de las magnitudes para fijarlos a cero (ya que aplicamos la misma situación que en el caso de las muertes). Ya consideramos que está bastante limpia la tabla de datos que ensucien, por lo que pasamos a preprocesarla.
+        Encontramos un problema al preprocesarlo que es que hay demasiados valores nulos, por lo que debemos corregir estas filas de forma que lo limpiaremos o eliminaremos las filas.
+        Procedemos a realizar unas catas para saber si realmente nos resultan utiles los datos por lo que nos disponemos a comprobar cuantos eventos han tenido perdidas economicas o muertes entre otros parámetros.
+        Eliminamos las tablas que consideramos innecesarias para abstraer el conocimiento y guardamos la nueva tabla ya preprocesada en formato CSV.
+    Preproceso de detalles 2 [preproceso_details_storms2.ipynb]
+        En este Script se intenta dar posicion a los eventos que la tienen nula.
+        
+        Primero para los eventos de posicion nula se mira el resto de eventos del mismo episodio, y en caso de que no sean nulos, se le da como posicion la media de las latitudes y longitudes tanto iniciales como finales de los eventos no nulos de su episodio.
+        Una vez hecho esto, se hace lo mismo con locations, pero solo con la posicion inicial, porque como se demostro en un script anterior, las posiciones finales estan corruptas. Para asegurarnos de que está desarrollado el código correctamente, procedemos a representarlo visualmente y a contar el número de eventos. En este caso encontramos 1904 casos.
+    Preproceso Tormentas 3 [preproceso_storms3.ipynb]
+        En este script se le intenta dar el radio a los eventos. Primero intentaremos utilziar los de la tabla locations porque parecen mas precisos, sino estuviera el valor, lo de Details. Por ultimo se le dara radio a aquellos que no tienen.
+        Para ello, usamos los radios de la tabla locations que hemos calculado anteriormente y transformamos los radios de millas a kilómetros.
+        Para dar valor a los eventos sin radio, se va a hacer la media de cada tipo de evento(lluvia, nieve, ...). Así tendremos una tabla con la media de radio por cada tipo de evento. Una vez hecho eso, a los eventos que no tenga radio, le asignaremos la media de su tipo de evento.
+        Después de ello procedemos a guardar las tablas.
